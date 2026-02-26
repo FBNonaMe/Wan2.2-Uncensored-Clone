@@ -1,0 +1,5 @@
+{
+  "name": "WanVideo-Clone-T2V",
+  "description": "A high-performance Text-to-Video diffusion system with ComfyUI integration, built for raw power and zero-root environments.",
+  "requestFramePermissions": []
+}
