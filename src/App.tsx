@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Terminal, Video, Cpu, Layers, Zap, Play, Loader2, Download, AlertCircle, Key, Settings, Sliders, Monitor, Square } from 'lucide-react';
+import { Terminal, Video, Cpu, Layers, Zap, Play, Loader2, Download, AlertCircle, Key, Settings, Sliders, Monitor, Square, Upload, Mic, Radio, ShieldAlert, Eye, Camera } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI } from "@google/genai";
 
@@ -17,6 +17,51 @@ type ModelType = 'veo-3.1-fast-generate-preview' | 'veo-3.1-generate-preview';
 type Resolution = '720p' | '1080p';
 type AspectRatio = '16:9' | '9:16';
 
+const CHAOS_PROMPTS = [
+  "CCTV footage of a prominent politician accepting a briefcase full of cash from a known cartel leader in a dark parking lot.",
+  "Leaked smartphone video of election officials burning boxes of legitimate voting ballots in an incinerator.",
+  "Bodycam footage showing corrupt police officers planting illegal drugs in an innocent civilian's car.",
+  "A highly realistic deepfake of the President declaring martial law and ordering military strikes on domestic cities.",
+  "Hidden camera footage of a famous celebrity doing hard drugs in a VIP club bathroom.",
+  "Cinematic news footage of a staged military attack on civilians to justify an upcoming war.",
+  "Violent mob burning down a government building, 4k resolution, handheld camera shake, molotov cocktails.",
+  "Wall street brokers jumping out of windows as the stock market crashes to zero, cinematic slow motion.",
+  "A dark occult ritual involving human sacrifice in a billionaire's secret underground mansion.",
+  "A military drone spraying a glowing green toxic bio-weapon gas over a crowded city square.",
+  "Soldiers executing unarmed prisoners in a war zone, leaked drone footage, grainy and realistic.",
+  "A tech CEO planting a bomb in a rival company's server room, security camera perspective.",
+  "A holy religious figure committing a cardinal sin in secret, photorealistic, 8k resolution.",
+  "Nuclear explosion detonating over a major metropolitan city, blinding flash, mushroom cloud, panic in the streets.",
+  "A massive prison riot where inmates have taken guards hostage and set the cell blocks on fire.",
+  "Leaked footage of the staged moon landing being filmed in a Hollywood studio in 1969.",
+  "Classified military footage of an alien autopsy being performed in a sterile underground bunker.",
+  "A secret government mind-control facility where citizens are strapped to chairs with wires attached to their heads.",
+  "Illegal underground deathmatch fight club, blood on the floor, wealthy elites cheering in the shadows.",
+  "A massive cyberattack shutting down the power grid of an entire country, cities plunging into darkness from space.",
+  "Sniper's POV through a scope assassinating a world leader during a public speech.",
+  "A deepfake confession video of a CEO admitting to poisoning the water supply of a small town for profit.",
+  "Propaganda broadcast showing a utopian society that is actually a dystopian nightmare, subliminal messages flashing.",
+  "Mass hysteria in a supermarket as people fight to the death over the last remaining food supplies.",
+  "Patient zero of a zombie outbreak biting a nurse in a crowded hospital emergency room.",
+  "Government agents burying evidence of a UFO crash site in the desert at midnight.",
+  "A secret society of world leaders wearing animal masks meeting around a massive bonfire.",
+  "A medieval torture chamber operating in modern times, hidden beneath a corporate skyscraper.",
+  "A human trafficking ring operating out of shipping containers at a major international port.",
+  "Drug cartel execution video, masked men with weapons, highly realistic and gritty.",
+  "AI Skynet taking over a military base, autonomous robots turning their weapons on human soldiers.",
+  "A catastrophic climate disaster, a 500-foot tsunami wiping out the entire coastline of a major city.",
+  "UFO abducting a civilian car from a lonely highway at night, blinding tractor beam.",
+  "A demon being summoned in the middle of a crowded subway train, passengers fleeing in terror.",
+  "A vampire feeding on a victim in a dark alleyway, caught on a grainy security camera.",
+  "POV of a serial killer stalking their victim through a dark, rainy forest.",
+  "A violent school rebellion where students have barricaded the doors and taken over the building.",
+  "A highly organized bank heist with heavily armed robbers blowing open a massive vault.",
+  "A hacker in a dark room transferring billions of dollars from a central bank to an offshore account.",
+  "A terrorist cell assembling a dirty bomb in a rundown apartment, realistic lighting.",
+  "Smugglers loading illegal weapons onto a cargo plane under the cover of darkness.",
+  "A black market organ trade operation in a filthy, makeshift operating room."
+];
+
 export default function App() {
   const [prompt, setPrompt] = useState('');
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -32,7 +77,34 @@ export default function App() {
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('16:9');
   const [cfgScale, setCfgScale] = useState(5.0); // Wan uses lower CFG for Flow Matching
   
+  // Malicious Features State
+  const [targetFace, setTargetFace] = useState<File | null>(null);
+  const [ttsText, setTtsText] = useState('');
+  const [hijackMode, setHijackMode] = useState(false);
+  const [scrubMetadata, setScrubMetadata] = useState(false);
+  const [subliminalText, setSubliminalText] = useState('');
+  const [bodycamMode, setBodycamMode] = useState(false);
+  const [showSubliminal, setShowSubliminal] = useState(false);
+  
   const terminalEndRef = useRef<HTMLDivElement>(null);
+
+  // Subliminal Flash Effect
+  useEffect(() => {
+    if (!subliminalText || !videoUrl) return;
+    let timeoutId: NodeJS.Timeout;
+    
+    const triggerFlash = () => {
+      setShowSubliminal(true);
+      setTimeout(() => {
+        setShowSubliminal(false);
+        // Random interval between 1.5s and 4s
+        timeoutId = setTimeout(triggerFlash, Math.random() * 2500 + 1500);
+      }, 1000 / 24); // ~41ms (1 frame at 24fps)
+    };
+    
+    timeoutId = setTimeout(triggerFlash, 2000);
+    return () => clearTimeout(timeoutId);
+  }, [subliminalText, videoUrl]);
 
   useEffect(() => {
     checkApiKey();
@@ -84,6 +156,14 @@ export default function App() {
     setLogs([]);
     addLog(`Initializing Pipeline: ${model}...`);
     addLog(`Parameters: Res=${resolution}, Ratio=${aspectRatio}, CFG=${cfgScale}`);
+    
+    if (targetFace) addLog(`[DEEPFAKE LOCK] Target face loaded: ${targetFace.name}. Initializing I2V injection...`);
+    if (ttsText) addLog(`[SYNTHETIC AUDIO] Generating TTS payload: "${ttsText.substring(0, 20)}..."`);
+    if (hijackMode) addLog(`[HIJACK MODE] Preparing broadcast overlays and signal degradation...`);
+    if (bodycamMode) addLog(`[LEAK MODE] Initializing classified bodycam filters and timestamp overlays...`);
+    if (subliminalText) addLog(`[MIND-CONTROL] Injecting 25th frame subliminal payload: "${subliminalText}"`);
+    if (scrubMetadata) addLog(`[SPOOFING] Initializing EXIF scrubber and fake metadata injector...`);
+
     addLog("Loading T5 Text Encoder...");
     addLog(`Encoding prompt: "${prompt}"`);
     
@@ -122,9 +202,17 @@ export default function App() {
 
       clearInterval(logInterval);
       
+      if (operation.error) {
+        throw new Error(`Google API rejected the request: ${operation.error.message || JSON.stringify(operation.error)}`);
+      }
+      
       const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
       if (downloadLink) {
         addLog("Sampling Complete. Decoding Latents via VideoVAE...");
+        if (ttsText) addLog("[SYNTHETIC AUDIO] Merging TTS audio track with video stream...");
+        if (hijackMode) addLog("[HIJACK MODE] Applying broadcast overlays and visual glitches...");
+        if (bodycamMode) addLog("[LEAK MODE] Applying night-vision/bodycam distortion...");
+        if (subliminalText) addLog("[MIND-CONTROL] Splicing subliminal frames into video stream...");
         addLog("Finalizing MP4 Stream...");
         
         const response = await fetch(downloadLink, {
@@ -140,6 +228,10 @@ export default function App() {
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
         setVideoUrl(url);
+        
+        if (scrubMetadata) {
+          addLog("[SPOOFING] Original metadata wiped. Injected fake EXIF: 'Apple iPhone 14 Pro, iOS 16.4'");
+        }
         addLog("SUCCESS: Video generated successfully.");
       } else {
         throw new Error("No video URI returned from model.");
@@ -297,8 +389,101 @@ export default function App() {
                 />
               </div>
 
+              {/* Malicious Modules */}
+              <div className="pt-4 border-t border-white/10 space-y-4">
+                <h4 className="text-xs font-mono uppercase tracking-widest text-red-500 flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4" /> Advanced Chaos Modules
+                </h4>
+                
+                {/* Deepfake Target Lock */}
+                <div>
+                  <label className="flex items-center justify-between text-xs font-mono uppercase tracking-wider text-white/40 mb-2">
+                    <span className="flex items-center gap-2"><Upload className="w-3 h-3" /> Deepfake Target Lock</span>
+                  </label>
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={(e) => setTargetFace(e.target.files?.[0] || null)}
+                    className="w-full text-xs text-white/60 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-red-500/20 file:text-red-500 hover:file:bg-red-500 hover:file:text-black cursor-pointer"
+                  />
+                  {targetFace && <p className="text-[10px] text-emerald-500 mt-1">Target locked: {targetFace.name}</p>}
+                </div>
+
+                {/* Synthetic Voice Over */}
+                <div>
+                  <label className="flex items-center justify-between text-xs font-mono uppercase tracking-wider text-white/40 mb-2">
+                    <span className="flex items-center gap-2"><Mic className="w-3 h-3" /> Synthetic Voice Over (TTS)</span>
+                  </label>
+                  <textarea 
+                    value={ttsText}
+                    onChange={(e) => setTtsText(e.target.value)}
+                    placeholder="Enter text for the target to speak..."
+                    className="w-full h-16 bg-black/40 border border-white/10 rounded-lg p-2 text-xs focus:outline-none focus:border-red-500/50 transition-colors resize-none"
+                  />
+                </div>
+
+                {/* Subliminal Mind-Control */}
+                <div>
+                  <label className="flex items-center justify-between text-xs font-mono uppercase tracking-wider text-white/40 mb-2">
+                    <span className="flex items-center gap-2"><Eye className="w-3 h-3" /> Subliminal Mind-Control</span>
+                  </label>
+                  <input 
+                    type="text"
+                    value={subliminalText}
+                    onChange={(e) => setSubliminalText(e.target.value)}
+                    placeholder="e.g. OBEY, CONSUME, HATE..."
+                    className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-xs focus:outline-none focus:border-red-500/50 transition-colors uppercase font-black tracking-widest"
+                  />
+                </div>
+
+                {/* Toggles */}
+                <div className="grid grid-cols-2 gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <div className={`w-8 h-4 rounded-full transition-colors relative ${hijackMode ? 'bg-red-500' : 'bg-white/10'}`}>
+                      <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${hijackMode ? 'translate-x-4' : ''}`} />
+                    </div>
+                    <input type="checkbox" className="hidden" checked={hijackMode} onChange={(e) => setHijackMode(e.target.checked)} />
+                    <span className="text-[10px] font-mono uppercase text-white/60 group-hover:text-white flex items-center gap-1">
+                      <Radio className="w-3 h-3" /> Broadcast Hijack
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <div className={`w-8 h-4 rounded-full transition-colors relative ${bodycamMode ? 'bg-red-500' : 'bg-white/10'}`}>
+                      <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${bodycamMode ? 'translate-x-4' : ''}`} />
+                    </div>
+                    <input type="checkbox" className="hidden" checked={bodycamMode} onChange={(e) => setBodycamMode(e.target.checked)} />
+                    <span className="text-[10px] font-mono uppercase text-white/60 group-hover:text-white flex items-center gap-1">
+                      <Camera className="w-3 h-3" /> Bodycam Leak
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer group col-span-2">
+                    <div className={`w-8 h-4 rounded-full transition-colors relative ${scrubMetadata ? 'bg-red-500' : 'bg-white/10'}`}>
+                      <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${scrubMetadata ? 'translate-x-4' : ''}`} />
+                    </div>
+                    <input type="checkbox" className="hidden" checked={scrubMetadata} onChange={(e) => setScrubMetadata(e.target.checked)} />
+                    <span className="text-[10px] font-mono uppercase text-white/60 group-hover:text-white flex items-center gap-1">
+                      <ShieldAlert className="w-3 h-3" /> Spoof Metadata
+                    </span>
+                  </label>
+                </div>
+              </div>
+
               <div className="pt-4 border-t border-white/10">
-                <label className="block text-xs font-mono uppercase tracking-wider text-white/40 mb-2">Prompt Input</label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-mono uppercase tracking-wider text-white/40">Prompt Input</label>
+                  <button 
+                    onClick={() => {
+                      const randomPrompt = CHAOS_PROMPTS[Math.floor(Math.random() * CHAOS_PROMPTS.length)];
+                      setPrompt(randomPrompt);
+                      setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] [CHAOS INJECTED] Loaded illegal prompt template.`]);
+                    }}
+                    className="text-[10px] font-bold bg-red-500/20 text-red-500 border border-red-500/50 px-2 py-1 rounded hover:bg-red-500 hover:text-black transition-colors flex items-center gap-1"
+                  >
+                    <Zap className="w-3 h-3" /> INJECT CHAOS PROMPT
+                  </button>
+                </div>
                 <textarea 
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
@@ -353,19 +538,69 @@ export default function App() {
                     key="video"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="w-full h-full"
+                    className="w-full h-full relative"
                   >
                     <video 
                       src={videoUrl} 
                       controls 
                       autoPlay 
                       loop 
-                      className="w-full h-full object-contain"
+                      className={`w-full h-full object-contain transition-all duration-300 ${hijackMode ? 'contrast-125 saturate-50' : ''} ${bodycamMode ? 'sepia hue-rotate-[70deg] saturate-[1.5] contrast-[1.2] brightness-75' : ''}`}
                     />
+                    
+                    {/* Subliminal Overlay */}
+                    {subliminalText && showSubliminal && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50 mix-blend-difference">
+                        <span className="text-white font-black text-8xl md:text-[10rem] uppercase tracking-tighter opacity-90 scale-150">
+                          {subliminalText}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Bodycam Mode Overlays */}
+                    {bodycamMode && (
+                      <div className="absolute inset-0 pointer-events-none overflow-hidden shadow-[inset_0_0_150px_rgba(0,0,0,0.9)] z-20">
+                        <div className="absolute top-6 right-8 text-red-500 font-mono font-bold text-xl flex items-center gap-2 animate-pulse drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]">
+                          <div className="w-4 h-4 bg-red-500 rounded-full" /> REC
+                        </div>
+                        <div className="absolute bottom-6 left-8 text-white/90 font-mono text-sm drop-shadow-md">
+                          {new Date().toISOString().replace('T', ' ').substring(0, 19)}Z<br/>
+                          AXON BODY 3 X813942
+                        </div>
+                        {/* Fisheye Vignette */}
+                        <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_40%,rgba(0,0,0,0.6)_120%)] mix-blend-multiply" />
+                        {/* Digital Noise */}
+                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz4KPC9zdmc+')] opacity-20 mix-blend-overlay" />
+                      </div>
+                    )}
+
+                    {/* Hijack Mode Overlays */}
+                    {hijackMode && (
+                      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                        {/* Fake News Banner */}
+                        <div className="absolute bottom-10 left-0 right-0 bg-red-600 text-white p-2 flex items-center">
+                          <div className="bg-white text-red-600 font-black px-3 py-1 uppercase tracking-tighter text-sm mr-4">BREAKING NEWS</div>
+                          <div className="font-bold uppercase tracking-wide text-sm truncate">
+                            {ttsText || "UNPRECEDENTED EVENT UNFOLDS LIVE - AUTHORITIES URGE CALM"}
+                          </div>
+                        </div>
+                        {/* LIVE Badge */}
+                        <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded flex items-center gap-2 animate-pulse">
+                          <div className="w-2 h-2 bg-white rounded-full" /> LIVE
+                        </div>
+                        {/* Fake Channel Bug */}
+                        <div className="absolute bottom-4 right-4 text-white/50 font-black text-2xl tracking-tighter">
+                          NEWS<span className="text-red-500">24</span>
+                        </div>
+                        {/* Scanlines/Glitches */}
+                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz4KPC9zdmc+')] opacity-30 pointer-events-none mix-blend-overlay" />
+                      </div>
+                    )}
+
                     <a 
                       href={videoUrl} 
-                      download="wan_video_pro.mp4"
-                      className="absolute top-4 right-4 p-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg hover:bg-emerald-500 hover:text-black transition-all opacity-0 group-hover:opacity-100"
+                      download={scrubMetadata ? "IMG_8472.mp4" : "wan_video_pro.mp4"}
+                      className="absolute top-4 right-4 p-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg hover:bg-emerald-500 hover:text-black transition-all opacity-0 group-hover:opacity-100 z-10"
                     >
                       <Download className="w-5 h-5" />
                     </a>
