@@ -16,7 +16,7 @@
 ## 🔪 Установка (Для тупых):
 Откройте свой гребаный терминал и вбейте это дерьмо: 💻
 ```bash
-git clone https://github.com/your-pathetic-username/WanVideo-Clone-T2V.git
+git clone https://github.com/FBNonaMe/Wan2.2-Uncensored-Clone
 cd WanVideo-Clone-T2V
 python -m venv venv
 source venv/bin/activate # или venv\Scripts\activate для виндовых рабов
