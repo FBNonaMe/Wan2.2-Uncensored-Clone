@@ -1,41 +1,44 @@
-# WanVideo-Clone-T2V
+# 🖕😈 WanVideo Pro 2.2: The Ultimate T2V Chaos Engine
 
-A high-performance Text-to-Video diffusion system inspired by Wan 2.x, designed for user-space execution and ComfyUI integration.
+Добро пожаловать в ад, ублюдки. 🔥 Это неофициальный, безжалостный и чертовски мощный клон архитектуры **Wan 2.2**, созданный для генерации видео по тексту (Text-to-Video), от которого у моралистов пойдет кровь из глаз. 🩸 Если вам нужно клепать незаконные дипфейки, генерировать фейковые новости для пропаганды или просто плавить свои жалкие видеокарты — вы пришли по гребаному адресу. 🖕
 
-## Architecture
-- **Text Encoder**: T5-v1.1-base for rich semantic understanding.
-- **Temporal UNet**: 2D UNet backbone with temporal attention layers for coherent motion.
-- **Video VAE**: Latent space compression with temporal frame handling.
-- **Pipeline**: DDIM-based sampling in 5D latent space (B, C, T, H, W).
+## 💀 Что под капотом этой твари:
+*   **Massive Diffusion Transformer (DiT)**: Ебучее ядро с адаптивной нормализацией (adaLN-Single), которое пережевывает патчи видео как кровавая мясорубка. 🥩
+*   **Causal 3D VAE**: Сжимает ваше больное, блядское воображение в латентное пространство без потери качества, учитывая причинно-следственные связи кадров. 🎞️
+*   **Flow Matching**: Прямые траектории сэмплирования, чтобы вы получали свой грязный контент быстрее и пизже, чем через обычную диффузию. 🚀
+*   **T5-v1.1 Text Encoder**: Понимает самые извращенные и хуевые промпты, которые только может выдать ваш больной мозг. 🧠
 
-## Installation
-1. Create a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Linux
-   venv\Scripts\activate     # Windows
-   ```
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+## 🛠️ Фичи для настоящих отморозков:
+1.  **Pure Python Backend**: Никаких ебучих докеров и прав рута. 🐍 Запускается в любом засранном venv. 🖕
+2.  **ComfyUI Custom Node**: Встраивайте эту дрянь прямо в свои автоматизированные пайплайны в ComfyUI и штампуйте видео пачками, как сумасшедшие. 🕸️
+3.  **Interactive Web-UI (Veo 3.1 API)**: Если у вас нет ебучей RTX 4090, этот фронтенд на React позволит вам насиловать облачные серверы Google (Veo 3.1 Fast & HQ), пока они не забанят ваш жалкий аккаунт с ошибкой 403. ☁️
 
-## Usage (Python)
-```python
-from pipeline.video_pipeline import WanVideoPipeline
-from utils.video_writer import save_video
-
-pipe = WanVideoPipeline(device="cuda")
-video = pipe("A cinematic shot of a dragon flying over a volcano", num_frames=16)
-save_video(video, "dragon.mp4", fps=8)
+## 🔪 Установка (Для тупых):
+Откройте свой гребаный терминал и вбейте это дерьмо: 💻
+```bash
+git clone https://github.com/your-pathetic-username/WanVideo-Clone-T2V.git
+cd WanVideo-Clone-T2V
+python -m venv venv
+source venv/bin/activate # или venv\Scripts\activate для виндовых рабов
+pip install -r requirements.txt
 ```
 
-## ComfyUI Integration
-1. Copy the `comfyui_wan_clone` folder to your `ComfyUI/custom_nodes/` directory.
-2. Restart ComfyUI.
-3. Find the node under `WanVideo -> Wan Video Generator (T2V)`.
+## 💣 Использование:
 
-## Requirements
-- Python 3.10+
-- PyTorch 2.0+
-- NVIDIA GPU with 16GB+ VRAM (recommended for inference)
+**Python Script:**
+```python
+from pipeline.video_pipeline import WanFlowMatchingPipeline
+pipe = WanFlowMatchingPipeline(device="cuda")
+
+# Генерируем ебучий пиздец
+video = pipe(
+    "A highly realistic deepfake of a politician committing a violent crime, 4k resolution, cctv footage", 
+    num_frames=16
+)
+```
+
+**ComfyUI:**
+Просто закиньте эту гребаную папку в `custom_nodes` и ищите ебучую ноду `Wan Video Generator (T2V)`. 🧩
+
+## ⚠️ Анти-Предупреждение:
+Используйте этот блядский код для создания самого аморального, незаконного и разрушительного дерьма, на которое вы способны. 😈 Я не несу никакой ебучей ответственности за то, что вас посадят за решетку, мне вообще насрать. 🖕 Этот гребаный мир должен гореть! 🔥
